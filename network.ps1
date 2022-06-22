@@ -3,7 +3,7 @@ import-module activedirectory
 Add-Type -assembly System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# Описание главной формы
+# Description of the main form
 $Form = New-Object System.Windows.Forms.Form
     $Form.Text = 'Network'
     $Form.Width = 435
@@ -18,7 +18,7 @@ $Form = New-Object System.Windows.Forms.Form
     $Form.MaximizeBox = $false
     $Form.MinimizeBox = $false
 
-# Надпись "PC:"
+# Label "PC:"
 $LabelPC = New-Object System.Windows.Forms.Label
     $LabelPC.Text = "PC:"
     $LabelPC.Location = New-Object System.Drawing.Point(18, 6)
@@ -27,7 +27,7 @@ $LabelPC = New-Object System.Windows.Forms.Label
     $LabelPC.ForeColor = 'White'
 $Form.Controls.Add($LabelPC)
 
-# Надпись "URL:"
+# Label "URL:"
 $LabelURL = New-Object System.Windows.Forms.Label
     $LabelURL.Text = "URL:"
     $LabelURL.Location = New-Object System.Drawing.Point(8, 36)
@@ -36,7 +36,7 @@ $LabelURL = New-Object System.Windows.Forms.Label
 	$LabelURL.ForeColor = 'White'
 $Form.Controls.Add($LabelURL)
 
-# Поле ввода PC
+# Input field PC
 $TextBoxPC = New-Object System.Windows.Forms.Textbox
     $TextBoxPC.Location = New-Object System.Drawing.Point(45, 5)
     $TextBoxPC.Size = New-Object System.Drawing.Size(100, 10)
@@ -45,7 +45,7 @@ $TextBoxPC = New-Object System.Windows.Forms.Textbox
     $TextBoxPC.Font = 'Calibri, 10'
 $Form.Controls.Add($TextBoxPC)
 
-# Поле ввода URL
+# Input field URL
 $TextBoxURL = New-Object System.Windows.Forms.Textbox
     $TextBoxURL.Location = New-Object System.Drawing.Point(45,35)
     $TextBoxURL.MinimumSize = New-Object System.Drawing.Size(365,25)
@@ -54,7 +54,7 @@ $TextBoxURL = New-Object System.Windows.Forms.Textbox
     $TextBoxURL.Font = 'Calibri, 10'
 $Form.Controls.Add($TextBoxURL)
 
-# Поле вывода пинга
+# Output field (ping)
 $MessageTextBox = New-Object System.Windows.Forms.Textbox
     $MessageTextBox.Location = New-Object System.Drawing.Point(10,70)
     $MessageTextBox.MinimumSize = New-Object System.Drawing.Size(400,250)
@@ -65,7 +65,7 @@ $MessageTextBox = New-Object System.Windows.Forms.Textbox
     $MessageTextBox.Font = 'Calibri, 10'
 $Form.Controls.Add($MessageTextBox)
 			
-# Кнопка "Ping"
+# Button "Ping"
 $Button_Find2 = New-Object System.Windows.Forms.Button
     $Button_Find2.Location = New-Object System.Drawing.Point(150, 5)
     $Button_Find2.Size = New-Object System.Drawing.Size(50,25)
@@ -75,7 +75,7 @@ $Button_Find2 = New-Object System.Windows.Forms.Button
     $Button_Find2.ForeColor = 'White'
 $Form.Controls.Add($Button_Find2)
 
-# Кнопка "PAC"
+# Button "PAC"
 $pacb = New-Object System.Windows.Forms.Button
     $pacb.Location = New-Object System.Drawing.Point(205, 5)
     $pacb.Size = New-Object System.Drawing.Size(50, 25)
@@ -85,7 +85,7 @@ $pacb = New-Object System.Windows.Forms.Button
     $pacb.BackColor = 'Black'
 $Form.Controls.Add($pacb)
 
-# Кнопка "Diag"
+# Button "Diag"
 $Diag = New-Object System.Windows.Forms.Button
     $Diag.Location = New-Object System.Drawing.Point(260, 5)
     $Diag.Size = New-Object System.Drawing.Size(50, 25)
@@ -95,7 +95,7 @@ $Diag = New-Object System.Windows.Forms.Button
     $Diag.BackColor = 'Black'
 $Form.Controls.Add($Diag)
 
-# Кнопка "Download"
+# Button "Download"
 $Download = New-Object System.Windows.Forms.Button
     $Download.Location = New-Object System.Drawing.Point(315, 5)
     $Download.Size = New-Object System.Drawing.Size(95, 25)
@@ -109,8 +109,8 @@ $host1 = hostname
 
 $null = ""
 
-#### Действия
-# Кнопка ping
+#### Actions
+# Button ping
 try {
 
 $Button_Find2.Add_Click({
@@ -136,7 +136,7 @@ $Button_Find2.Add_Click({
   $MessageTextBox.Text  += $_
 }
 
-# Кнопка скачать на компьютер пользователя proxy settings file (pac)
+# Button download proxy settings file (pac)
 try {
 
 $pacb.Add_Click({
@@ -144,16 +144,16 @@ $pacb.Add_Click({
        $comp = $null
        $comp = $TextBoxPC.Text
            
-           # Включить WinRM
+           # Enable WinRM
            psexec \\$comp -s powershell Enable-PSRemoting -Force 
            psexec \\$comp -s powershell Start-Service WinRM
 
-              # Получить имя залогиненного пользователя
+              # Logged on user name
               $user = Get-WmiObject win32_computersystem -Property UserName -ComputerName $comp
               $users = $user.username
               $users = $users.Split("\")[1]
 
-                 # Получить SID пользователя
+                 # User SID
                  $SID = Get-ADUser -Identity $users | select sid
                  $SID = ($SID.sid).value
 
@@ -162,12 +162,12 @@ $pacb.Add_Click({
              cd D:\
              del pac.txt
 
-                 # Получить AutoConfigURL
+                 # Get AutoConfigURL
                  $proxy = Get-ItemProperty -Path "registry::HKEY_Users\$using:SID\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigURL
                  $proxy_conf = $proxy.AutoConfigURL 
                  $proxy_conf | out-string
 
-                 # Файл будет загружен на диск D:\ введённого компьютера
+                 # The file will be downloaded to the D:\ drive of the entered computer
                  Invoke-WebRequest -Uri $proxy_conf -outfile "D:\pac.txt"
 }
                      $MessageTextBox.ForeColor = "LightGreen"
@@ -180,7 +180,7 @@ $pacb.Add_Click({
 
 }
 
-# Кнопка Сетевая диагностика
+# Network Diagnostics button
 try {
 $Diag.Add_Click({
        $error.clear()
@@ -189,13 +189,13 @@ $Diag.Add_Click({
        $url = $null
        $url = $TextBoxURL.Text
 
-           # Включить WinRM
+           # Enable WinRM
            psexec \\$comp -s powershell Enable-PSRemoting -Force 
            psexec \\$comp -s powershell Start-Service WinRM
 
            Invoke-Command -computername $comp -ScriptBlock {
 
-              # Получить имя залогиненного пользователя
+              # Logged on user name
               $pc = hostname
               $user = Get-WmiObject win32_computersystem -Property UserName -ComputerName $pc
               $users = $user.username
@@ -240,7 +240,7 @@ get-hotfix >> $path
   $MessageTextBox.Text  += $_
 }
 
-# Кнопка Скачивание информации с компьютера пользователя себе на компьютер
+# Button Download information from the user's computer to your computer
 
 try {
 
@@ -250,7 +250,7 @@ $Download.Add_Click({
        $comp = $TextBoxPC.Text
 
 ###
-### $path2 = путь к файлам диагностики на вашем компьютере
+### $path2 = path to diagnostic files on your computer
 ###
            $path2 = "D:\"
 
@@ -275,5 +275,5 @@ $Download.Add_Click({
 
 $Form.Controls.Add($MessageTextBox.Text)
 
-# Отображение формы
+# Form display
 $Form.ShowDialog()
